@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>タロショット（Web）</title>
+  <style>
+    body { font-family: sans-serif; max-width: 480px; margin: 24px auto; padding: 0 16px; }
+    h1 { font-size: 1.1em; }
+    .note { color: #555; font-size: 0.9em; margin-bottom: 16px; }
+    input[type="file"] { display: block; margin: 12px 0; }
+    button { padding: 8px 16px; cursor: pointer; }
+    #msg { margin-top: 12px; color: #333; min-height: 1.5em; }
+    .err { color: #c00; }
+    .ok { color: #080; }
+  </style>
+</head>
+<body>
+  <h1>タロショット（Web 入口）</h1>
+  <p class="note">スライドを開かなくても、この URL から利用できます（Step 1 確認用。本体 UI は Step 2 で切替）。</p>
+  <h2 style="font-size:1em;">画像をアップロード（1.png, 2.png … の順で使います）</h2>
+  <p>PNG / JPEG のみ。ファイル名の昇順でスライド番号になります。</p>
+  <input type="file" id="files" accept=".png,.jpg,.jpeg,image/png,image/jpeg" multiple>
+  <button type="button" id="btn">画像フォルダへアップロード</button>
+  <div id="msg"></div>
+  <script>
+    document.getElementById('btn').onclick = function() {
+      var input = document.getElementById('files');
+      var files = input.files;
+      var msg = document.getElementById('msg');
+      msg.textContent = '';
+      msg.className = '';
+      if (!files || files.length === 0) {
+        msg.textContent = 'ファイルを選択してください。';
+        msg.className = 'err';
+        return;
+      }
+      msg.textContent = 'アップロード中...';
+      var index = 0;
+      function next() {
+        if (index >= files.length) {
+          msg.textContent = '完了: ' + files.length + ' 件をアップロードしました。';
+          msg.className = 'ok';
+          input.value = '';
+          return;
+        }
+        var file = files[index];
+        var ext = (file.name.split('.').pop() || '').toLowerCase();
+        if (ext !== 'png' && ext !== 'jpg' && ext !== 'jpeg') {
+          index++;
+          next();
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function() {
+          var data = reader.result;
+          var base64 = data.indexOf('base64,') >= 0 ? data.split('base64,')[1] : data;
+          var mime = file.type || (ext === 'png' ? 'image/png' : 'image/jpeg');
+          google.script.run
+            .withSuccessHandler(function() {
+              index++;
+              msg.textContent = 'アップロード中... ' + index + '/' + files.length;
+              next();
+            })
+            .withFailureHandler(function(e) {
+              msg.textContent = 'エラー: ' + (e.message || e);
+              msg.className = 'err';
+            })
+            .saveImageToFolder(base64, file.name, mime);
+        };
+        reader.readAsDataURL(file);
+      }
+      next();
+    };
+  </script>
+</body>
+</html>

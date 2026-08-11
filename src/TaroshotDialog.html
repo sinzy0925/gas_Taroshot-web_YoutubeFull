@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>タロショット</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a2332;
+      --border: #2d3a4d;
+      --text: #e6edf3;
+      --text-muted: #8b9cb3;
+      --accent: #f97316;
+      --accent-hover: #ea580c;
+      --accent-soft: rgba(249, 115, 22, 0.15);
+      --success: #22c55e;
+      --err: #ef4444;
+      --input-bg: #0f1419;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 24px 20px 40px;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .page-header {
+      max-width: 720px;
+      margin: 0 auto 20px;
+    }
+    .page-header h1 {
+      font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+      font-weight: 600;
+      font-size: 22px;
+      margin: 0 0 6px 0;
+      letter-spacing: 0.02em;
+    }
+    .page-header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    @media (max-width: 520px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .panel-title {
+      font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      color: var(--accent);
+      margin: 0 0 16px 0;
+      padding: 8px 12px;
+      background: var(--accent-soft);
+      border-radius: var(--radius-sm);
+      display: inline-block;
+    }
+    .row {
+      margin-bottom: 14px;
+    }
+    .row:last-of-type { margin-bottom: 0; }
+    .label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    input[type="text"],
+    input[type="password"],
+    .input-display {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+    .input-display {
+      cursor: default;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .msg {
+      min-height: 40px;
+      padding: 10px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 14px;
+    }
+    .msg.success { color: var(--success); border-color: rgba(34, 197, 94, 0.4); }
+    .msg.err { color: var(--err); border-color: rgba(239, 68, 68, 0.4); }
+    .msg.busy { color: var(--accent); border-color: rgba(249, 115, 22, 0.4); }
+    .image-status { margin-top: 10px; min-height: 36px; }
+    .image-status.busy::before { content: ''; display: inline-block; width: 12px; height: 12px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.05s;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-block {
+      width: 100%;
+      margin-top: 16px;
+      text-align: center;
+    }
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--accent-soft); }
+    .btn-group .btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .btn-group .btn:last-child { margin-bottom: 0; }
+    #fileInput { display: none; }
+    .steps {
+      margin: 0 0 16px 0;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    details.advanced {
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>タロショット</h1>
+    <p>画像からナレーション付きスライドを作成します。</p>
+  </header>
+  <div class="layout">
+    <section class="panel">
+      <h2 class="panel-title">1. システム情報設定</h2>
+      <p class="steps">操作順: API Key を登録 → Drive を準備 → 画像登録 → スライド生成</p>
+      <div class="row">
+        <label class="label" for="apiKey">Gemini API Key（手入力はこれだけ）</label>
+        <input type="password" id="apiKey" placeholder="変更するときだけ入力" autocomplete="new-password" spellcheck="false">
+      </div>
+      <div class="row">
+        <span class="label">API Key 状態</span>
+        <div id="apiKeyStatus" class="input-display">未登録</div>
+      </div>
+      <button type="button" id="btnRegister" class="btn btn-block" style="margin-top:0;margin-bottom:14px;">API Key を登録</button>
+      <div class="row">
+        <span class="label">Drive 状態</span>
+        <div id="driveStatus" class="input-display">未準備</div>
+      </div>
+      <div class="btn-row">
+        <button type="button" id="btnDrivePrepare" class="btn">Drive を準備</button>
+        <button type="button" id="btnDriveRecreate" class="btn btn-secondary">フォルダを再作成</button>
+      </div>
+      <p class="label" style="margin-top:10px;">再作成しても旧フォルダは残ります。</p>
+      <div id="msg" class="msg"></div>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">2. スライド生成</h2>
+      <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" multiple>
+      <div class="btn-group">
+        <button type="button" id="btnImage" class="btn">1. 画像登録</button>
+        <div id="imageStatus" class="msg image-status" aria-live="polite"></div>
+        <button type="button" id="btnGenerate" class="btn">2. スライド生成</button>
+        <div id="slideGenStatus" class="msg image-status" aria-live="polite"></div>
+      </div>
+      <button type="button" id="btnOpenSlide" class="btn btn-block" style="margin-top: 12px;" disabled>3. スライド表示</button>
+    </section>
+  </div>
+
+  <script>
+    (function() {
+      var msgEl = document.getElementById('msg');
+      var imageStatusEl = document.getElementById('imageStatus');
+      var slideGenStatusEl = document.getElementById('slideGenStatus');
+      var apiKeyEl = document.getElementById('apiKey');
+      var apiKeyStatusEl = document.getElementById('apiKeyStatus');
+      var driveStatusEl = document.getElementById('driveStatus');
+      var btnDrivePrepare = document.getElementById('btnDrivePrepare');
+      var btnDriveRecreate = document.getElementById('btnDriveRecreate');
+      var btnRegister = document.getElementById('btnRegister');
+      var fileInput = document.getElementById('fileInput');
+      var btnImage = document.getElementById('btnImage');
+      var btnGenerate = document.getElementById('btnGenerate');
+      var btnOpenSlide = document.getElementById('btnOpenSlide');
+      var lastGeneratedUrl = '';
+      var hasApiKey = false;
+      var driveReady = false;
+
+      function setMsg(text, type) {
+        msgEl.textContent = text || '';
+        msgEl.className = 'msg' + (type ? ' ' + type : '');
+      }
+
+      function setImageStatus(text, type) {
+        imageStatusEl.textContent = text || '';
+        imageStatusEl.className = 'msg image-status' + (type ? ' ' + type : '');
+      }
+
+      function setSlideGenStatus(text, type) {
+        slideGenStatusEl.textContent = text || '';
+        slideGenStatusEl.className = 'msg image-status' + (type ? ' ' + type : '');
+      }
+
+      function setGeneratedUrl(url) {
+        lastGeneratedUrl = url || '';
+        btnOpenSlide.disabled = !lastGeneratedUrl;
+      }
+
+      function refreshActionHints() {
+        btnImage.disabled = !driveReady;
+        btnGenerate.disabled = !hasApiKey || !driveReady;
+        if (!driveReady) {
+          setImageStatus('先に「Drive を準備」を押してください。', '');
+        }
+        if (!hasApiKey && !driveReady) {
+          setSlideGenStatus('先に API Key を登録し、「Drive を準備」を押してください。', '');
+        } else if (!hasApiKey) {
+          setSlideGenStatus('先に API Key を登録してください。', '');
+        } else if (!driveReady) {
+          setSlideGenStatus('先に「Drive を準備」を押してください。', '');
+        }
+      }
+
+      function applyDriveResult(res) {
+        if (!res || !res.success) {
+          driveReady = false;
+          setMsg((res && res.error) ? res.error : 'Drive の準備に失敗しました。', 'err');
+          driveStatusEl.textContent = '未準備または無効。再作成してください。';
+          refreshActionHints();
+          return;
+        }
+        driveReady = true;
+        driveStatusEl.textContent = res.recreated
+          ? '再作成済み（' + (res.driveLabel || '') + '）'
+          : '準備済み（' + (res.driveLabel || '') + '）';
+        setMsg(res.recreated
+          ? '新しいフォルダを用意しました。旧フォルダは残しています。'
+          : 'Drive を準備しました。', 'success');
+        refreshActionHints();
+      }
+
+      function setApiKeyStatus() {
+        apiKeyEl.value = '';
+        apiKeyStatusEl.textContent = hasApiKey ? '登録済み（値は表示しません）' : '未登録';
+      }
+
+      function applyConfig(cfg) {
+        if (!cfg) return;
+        hasApiKey = !!cfg.hasApiKey;
+        driveReady = !!cfg.driveReady;
+        setApiKeyStatus();
+        if (driveReady) {
+          driveStatusEl.textContent = '準備済み（' + (cfg.driveLabel || 'タロショット/画像 と タロショット/スライド') + '）';
+        } else {
+          driveStatusEl.textContent = '未準備';
+        }
+        refreshActionHints();
+      }
+
+      google.script.run
+        .withSuccessHandler(function(cfg) {
+          applyConfig(cfg);
+        })
+        .withFailureHandler(function(e) {
+          setMsg('設定の取得に失敗しました: ' + (e.message || e), 'err');
+        })
+        .getConfigForDialog();
+
+      btnRegister.onclick = function() {
+        var apiKey = apiKeyEl.value.trim();
+        if (!apiKey) {
+          setMsg('Gemini API Key を入力してください。', 'err');
+          return;
+        }
+        setMsg('保存中…');
+        google.script.run
+          .withSuccessHandler(function() {
+            hasApiKey = true;
+            setApiKeyStatus();
+            setMsg('API Key を保存しました。', 'success');
+            refreshActionHints();
+          })
+          .withFailureHandler(function(e) {
+            setMsg('保存に失敗しました: ' + (e.message || e), 'err');
+          })
+          .saveConfigFromDialog(apiKey);
+      };
+
+      btnDrivePrepare.onclick = function() {
+        btnDrivePrepare.disabled = true;
+        setMsg('Drive を準備しています…', 'busy');
+        google.script.run
+          .withSuccessHandler(function(res) {
+            btnDrivePrepare.disabled = false;
+            applyDriveResult(res);
+          })
+          .withFailureHandler(function(e) {
+            btnDrivePrepare.disabled = false;
+            setMsg('Drive 準備に失敗しました: ' + (e.message || e), 'err');
+          })
+          .ensureTaroshotFolders();
+      };
+
+      btnDriveRecreate.onclick = function() {
+        if (!window.confirm('新しい「画像」「スライド」フォルダを作ります。旧フォルダは残ります。よろしいですか？')) {
+          return;
+        }
+        btnDriveRecreate.disabled = true;
+        setMsg('フォルダを再作成しています…', 'busy');
+        google.script.run
+          .withSuccessHandler(function(res) {
+            btnDriveRecreate.disabled = false;
+            applyDriveResult(res);
+          })
+          .withFailureHandler(function(e) {
+            btnDriveRecreate.disabled = false;
+            setMsg('再作成に失敗しました: ' + (e.message || e), 'err');
+          })
+          .recreateTaroshotFolders();
+      };
+
+      btnImage.onclick = function() {
+        if (!driveReady) {
+          setImageStatus('Drive が未準備です。「Drive を準備」を押してください。', 'err');
+          return;
+        }
+        fileInput.click();
+      };
+
+      fileInput.onchange = function() {
+        var files = fileInput.files;
+        if (!files || files.length === 0) return;
+        var total = files.length;
+        var validCount = 0;
+        for (var i = 0; i < files.length; i++) {
+          var ext = (files[i].name.split('.').pop() || '').toLowerCase();
+          if (ext === 'png' || ext === 'jpg' || ext === 'jpeg') validCount++;
+        }
+        btnImage.disabled = true;
+        setImageStatus('フォルダをクリアしています…', 'busy');
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && !res.success) {
+              setImageStatus(res.error || 'フォルダのクリアに失敗しました。', 'err');
+              btnImage.disabled = false;
+              fileInput.value = '';
+              return;
+            }
+            setImageStatus('処理中… 1/' + total + ' 枚目をアップロードしています', 'busy');
+            var n = 0;
+            function next() {
+          if (n >= total) {
+            setImageStatus('完了: ' + validCount + ' 件をアップロードしました。', 'success');
+            btnImage.disabled = false;
+            fileInput.value = '';
+            return;
+          }
+          var file = files[n];
+          var ext = (file.name.split('.').pop() || '').toLowerCase();
+          if (ext !== 'png' && ext !== 'jpg' && ext !== 'jpeg') {
+            n++;
+            next();
+            return;
+          }
+          var current = n + 1;
+          setImageStatus('処理中… ' + current + '/' + total + ' 枚目をアップロードしています', 'busy');
+          var reader = new FileReader();
+          reader.onload = function() {
+            var data = reader.result;
+            var base64 = data.indexOf('base64,') >= 0 ? data.split('base64,')[1] : data;
+            var mime = file.type || (ext === 'png' ? 'image/png' : 'image/jpeg');
+            google.script.run
+              .withSuccessHandler(function() {
+                n++;
+                if (n < total) {
+                  setImageStatus('処理中… ' + (n + 1) + '/' + total + ' 枚目をアップロードしています', 'busy');
+                }
+                next();
+              })
+              .withFailureHandler(function(e) {
+                setImageStatus('エラー: ' + (e.message || e), 'err');
+                btnImage.disabled = false;
+                fileInput.value = '';
+              })
+              .saveImageFromDialog(base64, file.name, mime);
+          };
+          reader.readAsDataURL(file);
+            }
+          next();
+          })
+          .withFailureHandler(function(e) {
+            setImageStatus('エラー: ' + (e.message || e), 'err');
+            btnImage.disabled = false;
+            fileInput.value = '';
+          })
+          .clearImageFolderForDialog();
+      };
+
+      btnGenerate.onclick = function() {
+        if (!hasApiKey) {
+          setSlideGenStatus('Gemini API Key が未登録です。左側で登録してください。', 'err');
+          return;
+        }
+        if (!driveReady) {
+          setSlideGenStatus('Drive が未準備です。「Drive を準備」を押してください。', 'err');
+          return;
+        }
+        btnGenerate.disabled = true;
+        setSlideGenStatus('画像を読み込み、ナレーションを生成中…（数十秒かかることがあります）', 'busy');
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (!res || !res.success) {
+              refreshActionHints();
+              setSlideGenStatus(res && res.error ? res.error : 'ナレーションの生成に失敗しました。', 'err');
+              return;
+            }
+            setSlideGenStatus('スライドを作成中…', 'busy');
+            google.script.run
+              .withSuccessHandler(function(res2) {
+                refreshActionHints();
+                if (res2 && res2.success && res2.url) {
+                  setGeneratedUrl(res2.url);
+                  window.open(res2.url, '_blank');
+                  setSlideGenStatus('３．スライド表示をクリックしてください', 'success');
+                } else {
+                  setSlideGenStatus(res2 && res2.error ? res2.error : 'スライドの作成に失敗しました。', 'err');
+                }
+              })
+              .withFailureHandler(function(e) {
+                refreshActionHints();
+                setSlideGenStatus('エラー: ' + (e.message || e), 'err');
+              })
+              .runSlideGenerationStep2(res.merged, res.jsonFileId || '');
+          })
+          .withFailureHandler(function(e) {
+            refreshActionHints();
+            setSlideGenStatus('エラー: ' + (e.message || e), 'err');
+          })
+          .runSlideGenerationStep1();
+      };
+
+      btnOpenSlide.onclick = function() {
+        if (lastGeneratedUrl) {
+          window.open(lastGeneratedUrl, '_blank');
+        }
+      };
+    })();
+  </script>
+</body>
+</html>
