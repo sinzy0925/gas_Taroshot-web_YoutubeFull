@@ -28,6 +28,10 @@ var CONFIG = {
   PROP_GEMINI_MODEL: "GEMINI_MODEL",
   /** 既定の Gemini モデル（AI Studio の「Gemini 2.5 Pro Preview」「Gemini 3.1 Pro Preview」等。利用可能な ID は AI Studio で確認し、必要なら GEMINI_MODEL で上書き） */
   DEFAULT_GEMINI_MODEL: "gemini-3.5-flash-lite",
+  /** Gemini API Key 取得ページ（「GeminiAPIKey取得」ボタン） */
+  GEMINI_API_KEY_URL: "https://aistudio.google.com/api-keys",
+  /** 取得方法確認動画の URL。空のときはボタン押下時に案内のみ。後で YouTube 等を入れる */
+  API_KEY_HOWTO_VIDEO_URL: "",
   /** スライド上の画像の高さ上限（cm）。これを超える場合は縦横比を保って縮小する */
   IMAGE_MAX_HEIGHT_CM: 14.3,
   /** 保存ファイル名のプレフィックス */

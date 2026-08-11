@@ -8,16 +8,16 @@
   <style>
     :root {
       --bg: #0f1419;
-      --card: #1a2332;
-      --border: #2d3a4d;
+      --card: #2d3001;
+      --border: #4a5d75;
       --text: #e6edf3;
       --text-muted: #8b9cb3;
-      --accent: #f97316;
-      --accent-hover: #ea580c;
-      --accent-soft: rgba(249, 115, 22, 0.15);
+      --accent: #ff9f4a;
+      --accent-hover: #ffb56e;
+      --accent-soft: rgba(255, 159, 74, 0.22);
       --success: #22c55e;
       --err: #ef4444;
-      --input-bg: #0f1419;
+      --input-bg: #2c3a4d;
       --radius: 12px;
       --radius-sm: 8px;
     }
@@ -33,26 +33,32 @@
       min-height: 100vh;
     }
     .page-header {
-      max-width: 720px;
+      max-width: 760px;
       margin: 0 auto 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 12px;
     }
     .page-header h1 {
       font-family: 'Outfit', 'Noto Sans JP', sans-serif;
       font-weight: 600;
       font-size: 22px;
-      margin: 0 0 6px 0;
+      margin: 0;
       letter-spacing: 0.02em;
+      white-space: nowrap;
     }
     .page-header p {
       margin: 0;
       color: var(--text-muted);
       font-size: 13px;
+      white-space: nowrap;
     }
     .layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 24px;
-      max-width: 720px;
+      max-width: 760px;
       margin: 0 auto;
     }
     @media (max-width: 520px) {
@@ -122,7 +128,7 @@
     }
     .msg.success { color: var(--success); border-color: rgba(34, 197, 94, 0.4); }
     .msg.err { color: var(--err); border-color: rgba(239, 68, 68, 0.4); }
-    .msg.busy { color: var(--accent); border-color: rgba(249, 115, 22, 0.4); }
+    .msg.busy { color: var(--accent); border-color: rgba(255, 159, 74, 0.45); }
     .image-status { margin-top: 10px; min-height: 36px; }
     .image-status.busy::before { content: ''; display: inline-block; width: 12px; height: 12px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -142,7 +148,7 @@
     .btn:hover { background: var(--accent-hover); }
     .btn:active { transform: scale(0.98); }
     .btn:disabled {
-      opacity: 0.6;
+      opacity: 0.78;
       cursor: not-allowed;
       transform: none;
     }
@@ -168,6 +174,11 @@
       margin-bottom: 10px;
     }
     .btn-group .btn:last-child { margin-bottom: 0; }
+    a.btn {
+      text-decoration: none;
+      text-align: center;
+      box-sizing: border-box;
+    }
     #fileInput { display: none; }
     .steps {
       margin: 0 0 16px 0;
@@ -193,6 +204,10 @@
   <div class="layout">
     <section class="panel">
       <h2 class="panel-title">1. システム情報設定</h2>
+      <div class="btn-row" style="margin-top:0;margin-bottom:16px;">
+        <a class="btn" id="btnGetApiKey" href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer">GeminiAPIKey取得</a>
+        <button type="button" id="btnHowtoVideo" class="btn">取得方法確認動画</button>
+      </div>
       <p class="steps">操作順: API Key を登録 → Drive を準備 → 画像登録 → スライド生成</p>
       <div class="row">
         <label class="label" for="apiKey">Gemini API Key（手入力はこれだけ）</label>
@@ -230,6 +245,7 @@
 
   <script>
     (function() {
+      var API_KEY_HOWTO_VIDEO_URL = '';
       var msgEl = document.getElementById('msg');
       var imageStatusEl = document.getElementById('imageStatus');
       var slideGenStatusEl = document.getElementById('slideGenStatus');
@@ -238,6 +254,7 @@
       var driveStatusEl = document.getElementById('driveStatus');
       var btnDrivePrepare = document.getElementById('btnDrivePrepare');
       var btnDriveRecreate = document.getElementById('btnDriveRecreate');
+      var btnHowtoVideo = document.getElementById('btnHowtoVideo');
       var btnRegister = document.getElementById('btnRegister');
       var fileInput = document.getElementById('fileInput');
       var btnImage = document.getElementById('btnImage');
@@ -309,6 +326,10 @@
         if (!cfg) return;
         hasApiKey = !!cfg.hasApiKey;
         driveReady = !!cfg.driveReady;
+        API_KEY_HOWTO_VIDEO_URL = (cfg.apiKeyHowtoVideoUrl || '').trim();
+        if (cfg.geminiApiKeyUrl) {
+          document.getElementById('btnGetApiKey').href = cfg.geminiApiKeyUrl;
+        }
         setApiKeyStatus();
         if (driveReady) {
           driveStatusEl.textContent = '準備済み（' + (cfg.driveLabel || 'タロショット/画像 と タロショット/スライド') + '）';
@@ -326,6 +347,15 @@
           setMsg('設定の取得に失敗しました: ' + (e.message || e), 'err');
         })
         .getConfigForDialog();
+
+      btnHowtoVideo.onclick = function() {
+        var url = (API_KEY_HOWTO_VIDEO_URL || '').trim();
+        if (!url) {
+          setMsg('取得方法の動画 URL はまだ設定されていません。', 'err');
+          return;
+        }
+        window.open(url, '_blank');
+      };
 
       btnRegister.onclick = function() {
         var apiKey = apiKeyEl.value.trim();

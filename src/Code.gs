@@ -1,5 +1,5 @@
 /**
- * 20260811 14:41
+ * 20260811 21:00
  * スライド起動時にメニューを追加。メニューから「タロショットを開く」でモーダルダイアログを表示。
  * コンテナバインド（スライドに紐付けたスクリプト）で使用すること。
  */
@@ -15,10 +15,20 @@ function onOpen() {
  * タロショット用モーダルダイアログを表示する。
  */
 function showTaroshotDialog() {
-  var html = HtmlService.createHtmlOutputFromFile("TaroshotDialog")
+  var html = createTaroshotHtml()
     .setWidth(720)
     .setHeight(520);
   SlidesApp.getUi().showModalDialog(html, "タロショット (YouTube)");
+}
+
+/**
+ * 本体 UI を生成する。Config のヘルプ URL を HTML に渡す。
+ * @returns {GoogleAppsScript.HTML.HtmlOutput}
+ */
+function createTaroshotHtml() {
+  return HtmlService.createHtmlOutputFromFile("TaroshotDialog")
+    .setTitle("タロショット")
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 /**
@@ -70,7 +80,9 @@ function getConfigForDialog() {
   return {
     hasApiKey: !!(rawKey && String(rawKey).trim()),
     driveReady: driveReady,
-    driveLabel: driveLabel
+    driveLabel: driveLabel,
+    geminiApiKeyUrl: CONFIG.GEMINI_API_KEY_URL || "https://aistudio.google.com/api-keys",
+    apiKeyHowtoVideoUrl: CONFIG.API_KEY_HOWTO_VIDEO_URL || ""
   };
 }
 
@@ -366,9 +378,7 @@ function runImageToJsonAndReturnUrl() {
  * デプロイは「実行するユーザー = ウェブアプリにアクセスしているユーザー」で行うこと。
  */
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile("TaroshotDialog")
-    .setTitle("タロショット")
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  return createTaroshotHtml();
 }
 
 /**
