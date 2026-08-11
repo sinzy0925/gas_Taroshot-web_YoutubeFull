@@ -1,28 +1,9 @@
-/**
- * 20260811 21:00
- * スライド起動時にメニューを追加。メニューから「タロショットを開く」でモーダルダイアログを表示。
- * コンテナバインド（スライドに紐付けたスクリプト）で使用すること。
+/**21:16
+ * タロショット Web アプリ本体。入口は doGet（スライドメニューは使わない）。
  */
 
-function onOpen() {
-  var ui = SlidesApp.getUi();
-  ui.createMenu("タロショット")
-    .addItem("タロショットを開く", "showTaroshotDialog")
-    .addToUi();
-}
-
 /**
- * タロショット用モーダルダイアログを表示する。
- */
-function showTaroshotDialog() {
-  var html = createTaroshotHtml()
-    .setWidth(720)
-    .setHeight(520);
-  SlidesApp.getUi().showModalDialog(html, "タロショット (YouTube)");
-}
-
-/**
- * 本体 UI を生成する。Config のヘルプ URL を HTML に渡す。
+ * 本体 UI を生成する。
  * @returns {GoogleAppsScript.HTML.HtmlOutput}
  */
 function createTaroshotHtml() {
